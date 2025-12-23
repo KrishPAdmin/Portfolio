@@ -5,7 +5,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
     <title>Krish Patel</title>
     <meta name="description" content="Krish Patel's Portfolio" />
 
@@ -308,6 +307,41 @@
       </div>
     </section>
 
+    <section id="github-projects" class="github-strip">
+      <div class="main-container">
+        <div class="glass-panel github-strip__panel">
+          <h2 class="heading heading-sec github-strip__heading">
+            <span class="heading-sec__main">Latest on GitHub</span>
+            <span class="heading-sec__sub">A quick scroll through my most recently updated repositories.</span>
+          </h2>
+
+          <div class="github-strip__controls" aria-label="GitHub project scroller controls">
+            <button class="github-strip__btn" type="button" aria-label="Scroll left" data-github-scroll="left">‹</button>
+
+            <div class="github-strip__scroller" id="githubScroller" tabindex="0" aria-label="GitHub repositories">
+              <div class="github-strip__list" id="githubRepoList" role="list">
+                <a class="github-card github-card--skeleton" href="#" aria-hidden="true" tabindex="-1"></a>
+                <a class="github-card github-card--skeleton" href="#" aria-hidden="true" tabindex="-1"></a>
+                <a class="github-card github-card--skeleton" href="#" aria-hidden="true" tabindex="-1"></a>
+                <a class="github-card github-card--skeleton" href="#" aria-hidden="true" tabindex="-1"></a>
+                <a class="github-card github-card--skeleton" href="#" aria-hidden="true" tabindex="-1"></a>
+                <a class="github-card github-card--skeleton" href="#" aria-hidden="true" tabindex="-1"></a>
+              </div>
+            </div>
+
+            <button class="github-strip__btn" type="button" aria-label="Scroll right" data-github-scroll="right">›</button>
+          </div>
+
+          <div class="github-strip__footer">
+            <a class="about-link" href="https://github.com/KrishPAdmin" target="_blank" rel="noopener noreferrer">
+              View all repositories on GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
     <section id="projects" class="projects sec-pad">
       <div class="main-container">
         <h2 class="heading heading-sec heading-sec__mb-bg">
@@ -491,7 +525,217 @@
 
         setOpen(false);
       })();
+      (function () {
+        var btn = document.querySelector(".header__main-ham-menu-cont");
+        var menu = document.getElementById("mobileMenu");
+        var yearNow = document.getElementById("yearNow");
+
+        if (yearNow) yearNow.textContent = String(new Date().getFullYear());
+        if (!btn || !menu) return;
+
+        function setOpen(open) {
+          btn.setAttribute("aria-expanded", open ? "true" : "false");
+          btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+          menu.hidden = !open;
+          menu.classList.toggle("d-none", !open);
+          document.body.style.overflow = open ? "hidden" : "";
+        }
+
+        function toggle() {
+          var isOpen = btn.getAttribute("aria-expanded") === "true";
+          setOpen(!isOpen);
+        }
+
+        btn.addEventListener("click", toggle);
+
+        btn.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggle();
+          }
+          if (e.key === "Escape") setOpen(false);
+        });
+
+        menu.addEventListener("click", function (e) {
+          var a = e.target && e.target.closest ? e.target.closest("a") : null;
+          if (a) setOpen(false);
+        });
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") setOpen(false);
+        });
+
+        window.addEventListener("resize", function () {
+          if (window.matchMedia && window.matchMedia("(min-width: 601px)").matches) setOpen(false);
+        });
+
+        setOpen(false);
+      })();
+
+      (function () {
+        var username = "KrishPAdmin";
+        var maxRepos = 10;
+        var cacheHours = 6;
+
+        var list = document.getElementById("githubRepoList");
+        var scroller = document.getElementById("githubScroller");
+        if (!list || !scroller) return;
+
+        function fmtDate(iso) {
+          try {
+            return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+          } catch (e) {
+            return "";
+          }
+        }
+
+        function clearList() {
+          while (list.firstChild) list.removeChild(list.firstChild);
+        }
+
+        function makeEl(tag, className, text) {
+          var el = document.createElement(tag);
+          if (className) el.className = className;
+          if (typeof text === "string") el.textContent = text;
+          return el;
+        }
+
+        function buildCard(repo) {
+          var a = document.createElement("a");
+          a.className = "github-card";
+          a.href = repo.html_url;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.setAttribute("role", "listitem");
+          a.setAttribute("aria-label", repo.name);
+
+          var top = makeEl("div", "github-card__top");
+          var name = makeEl("div", "github-card__name", repo.name);
+          top.appendChild(name);
+
+          var desc = makeEl("div", "github-card__desc", repo.description || "No description yet.");
+          var meta = makeEl("div", "github-card__meta");
+
+          var left = makeEl("div", "github-card__meta-left");
+          var lang = repo.language ? makeEl("span", "github-pill", repo.language) : null;
+          var stars = makeEl("span", "github-pill", "★ " + String(repo.stargazers_count || 0));
+          if (lang) left.appendChild(lang);
+          left.appendChild(stars);
+
+          var right = makeEl("div", "github-card__meta-right", "Updated " + fmtDate(repo.updated_at));
+
+          meta.appendChild(left);
+          meta.appendChild(right);
+
+          a.appendChild(top);
+          a.appendChild(desc);
+          a.appendChild(meta);
+
+          return a;
+        }
+
+        function render(repos) {
+          clearList();
+          repos.forEach(function (r) {
+            list.appendChild(buildCard(r));
+          });
+        }
+
+        function getCacheKey() {
+          return "kp_github_repos_" + username;
+        }
+
+        function readCache() {
+          try {
+            var raw = localStorage.getItem(getCacheKey());
+            if (!raw) return null;
+            var parsed = JSON.parse(raw);
+            if (!parsed || !parsed.ts || !Array.isArray(parsed.data)) return null;
+            var ageMs = Date.now() - parsed.ts;
+            if (ageMs > cacheHours * 60 * 60 * 1000) return null;
+            return parsed.data;
+          } catch (e) {
+            return null;
+          }
+        }
+
+        function writeCache(data) {
+          try {
+            localStorage.setItem(getCacheKey(), JSON.stringify({ ts: Date.now(), data: data }));
+          } catch (e) {}
+        }
+
+        function fetchRepos() {
+          var url =
+            "https://api.github.com/users/" +
+            encodeURIComponent(username) +
+            "/repos?per_page=100&sort=updated";
+
+          return fetch(url, {
+            headers: { Accept: "application/vnd.github+json" }
+          })
+            .then(function (res) {
+              if (!res.ok) throw new Error("GitHub API error");
+              return res.json();
+            })
+            .then(function (data) {
+              var cleaned = (data || [])
+                .filter(function (r) {
+                  return r && !r.fork && !r.archived;
+                })
+                .sort(function (a, b) {
+                  return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+                })
+                .slice(0, maxRepos);
+
+              writeCache(cleaned);
+              return cleaned;
+            });
+        }
+
+        var cached = readCache();
+        if (cached && cached.length) {
+          render(cached);
+        } else {
+          fetchRepos()
+            .then(function (repos) {
+              if (repos && repos.length) render(repos);
+              else {
+                clearList();
+                var empty = makeEl("div", "github-strip__empty", "No repositories to show right now.");
+                list.appendChild(empty);
+              }
+            })
+            .catch(function () {
+              clearList();
+              var fail = makeEl(
+                "div",
+                "github-strip__empty",
+                "Could not load GitHub projects (rate limit or network)."
+              );
+              list.appendChild(fail);
+            });
+        }
+
+        function scrollByAmount(dir) {
+          var amount = Math.max(260, Math.floor(scroller.clientWidth * 0.85));
+          scroller.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+        }
+
+        var btns = document.querySelectorAll("[data-github-scroll]");
+        btns.forEach(function (b) {
+          b.addEventListener("click", function () {
+            scrollByAmount(b.getAttribute("data-github-scroll"));
+          });
+        });
+
+        scroller.addEventListener("keydown", function (e) {
+          if (e.key === "ArrowLeft") scrollByAmount("left");
+          if (e.key === "ArrowRight") scrollByAmount("right");
+        });
+      })();
     </script>
+
 
     <style>
       :root {
@@ -1040,6 +1284,188 @@
         html { scroll-behavior: auto; }
         .btn, .nav-icon span { transition: none; }
         .mouse::before { animation: none; }
+      }
+      .github-strip {
+      padding: 6rem 0 2rem 0;
+      }
+
+      .github-strip__panel {
+        max-width: 112rem;
+        margin: 0 auto;
+        padding: clamp(2.0rem, 2.6vw, 3.4rem);
+      }
+
+      .github-strip__heading {
+        margin-bottom: 2.2rem;
+      }
+
+      .github-strip__controls {
+        display: flex;
+        align-items: stretch;
+        gap: 1.2rem;
+      }
+
+      .github-strip__btn {
+        min-width: 4.4rem;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--accent);
+        border-radius: 12px;
+        font-size: 2.8rem;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: var(--shadow);
+        transition: transform 0.2s ease, filter 0.2s ease;
+      }
+
+      .github-strip__btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.08);
+      }
+
+      .github-strip__scroller {
+        flex: 1;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        background: rgba(0, 0, 0, 0.16);
+      }
+
+      .github-strip__scroller:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 3px;
+      }
+
+      .github-strip__list {
+        display: flex;
+        gap: 1.6rem;
+        padding: 1.2rem;
+        min-height: 16.5rem;
+      }
+
+      .github-card {
+        scroll-snap-align: start;
+        min-width: clamp(24rem, 34vw, 32rem);
+        max-width: 34rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 1.2rem;
+        padding: 1.6rem;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: var(--shadow);
+        transition: transform 0.2s ease, filter 0.2s ease;
+      }
+
+      .github-card:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.06);
+      }
+
+      .github-card__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.2rem;
+      }
+
+      .github-card__name {
+        font-size: 1.7rem;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: 0.3px;
+        text-shadow: var(--titleShadow);
+        word-break: break-word;
+      }
+
+      .github-card__desc {
+        font-size: 1.45rem;
+        color: var(--textSoft);
+        line-height: 1.6;
+      }
+
+      .github-card__meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.2rem;
+        margin-top: 0.2rem;
+      }
+
+      .github-card__meta-left {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+      }
+
+      .github-card__meta-right {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--textSub);
+        white-space: nowrap;
+      }
+
+      .github-pill {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: #000;
+        background: var(--accent);
+        border-radius: 999px;
+        padding: 0.5rem 0.9rem;
+      }
+
+      .github-strip__footer {
+        margin-top: 1.6rem;
+        display: flex;
+        justify-content: center;
+      }
+
+      .github-strip__empty {
+        color: var(--textSub);
+        font-size: 1.6rem;
+        font-weight: 800;
+        padding: 1.2rem;
+      }
+
+      .github-card--skeleton {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .github-card--skeleton::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-40%);
+        background: linear-gradient(
+          to right,
+          transparent,
+          rgba(255, 255, 255, 0.10),
+          transparent
+        );
+        animation: githubShimmer 1.3s infinite;
+      }
+
+      @keyframes githubShimmer {
+        0% { transform: translateX(-60%); }
+        100% { transform: translateX(60%); }
+      }
+
+      @media (max-width: 56.25em) {
+        .github-strip__btn {
+          display: none;
+        }
+        .github-strip__list {
+          padding: 1.2rem 1.0rem;
+        }
       }
     </style>
   </body>
