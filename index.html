@@ -341,7 +341,6 @@
       </div>
     </section>
 
-
     <section id="projects" class="projects sec-pad">
       <div class="main-container">
         <h2 class="heading heading-sec heading-sec__mb-bg">
@@ -487,51 +486,8 @@
         if (yearNow) yearNow.textContent = String(new Date().getFullYear());
         if (!btn || !menu) return;
 
-        function setOpen(open) {
-          btn.setAttribute("aria-expanded", open ? "true" : "false");
-          btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
-          menu.hidden = !open;
-          menu.classList.toggle("d-none", !open);
-          document.body.style.overflow = open ? "hidden" : "";
-        }
-
-        function toggle() {
-          var isOpen = btn.getAttribute("aria-expanded") === "true";
-          setOpen(!isOpen);
-        }
-
-        btn.addEventListener("click", toggle);
-
-        btn.addEventListener("keydown", function (e) {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            toggle();
-          }
-          if (e.key === "Escape") setOpen(false);
-        });
-
-        menu.addEventListener("click", function (e) {
-          var a = e.target && e.target.closest ? e.target.closest("a") : null;
-          if (a) setOpen(false);
-        });
-
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "Escape") setOpen(false);
-        });
-
-        window.addEventListener("resize", function () {
-          if (window.matchMedia && window.matchMedia("(min-width: 601px)").matches) setOpen(false);
-        });
-
-        setOpen(false);
-      })();
-      (function () {
-        var btn = document.querySelector(".header__main-ham-menu-cont");
-        var menu = document.getElementById("mobileMenu");
-        var yearNow = document.getElementById("yearNow");
-
-        if (yearNow) yearNow.textContent = String(new Date().getFullYear());
-        if (!btn || !menu) return;
+        if (btn.dataset.kpHamBound === "1") return;
+        btn.dataset.kpHamBound = "1";
 
         function setOpen(open) {
           btn.setAttribute("aria-expanded", open ? "true" : "false");
@@ -546,7 +502,10 @@
           setOpen(!isOpen);
         }
 
-        btn.addEventListener("click", toggle);
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          toggle();
+        });
 
         btn.addEventListener("keydown", function (e) {
           if (e.key === "Enter" || e.key === " ") {
@@ -559,6 +518,10 @@
         menu.addEventListener("click", function (e) {
           var a = e.target && e.target.closest ? e.target.closest("a") : null;
           if (a) setOpen(false);
+        });
+
+        document.addEventListener("click", function (e) {
+          if (!menu.contains(e.target) && !btn.contains(e.target)) setOpen(false);
         });
 
         document.addEventListener("keydown", function (e) {
@@ -735,7 +698,6 @@
         });
       })();
     </script>
-
 
     <style>
       :root {
@@ -1031,6 +993,9 @@
 
       .header__sm-menu {
         position: absolute;
+        z-index: 1100;
+        max-height: calc(100svh - var(--headerH));
+        overflow-y: auto;
         top: 100%;
         left: 0;
         background: rgba(12, 14, 16, 0.90);
@@ -1198,217 +1163,204 @@
         margin-bottom: 11rem;
       }
       @media only screen and (max-width: 56.25em) {
-        .projects__row { grid-template-columns: 1fr; grid-gap: 2rem; margin-bottom: 8rem; text-align: center; }
+        .projects__row {
+          grid-template-columns: 1fr;
+          grid-gap: 3rem;
+          margin-bottom: 8rem;
+        }
       }
 
-      .projects__row-img-cont { overflow: hidden; border-radius: var(--radius); box-shadow: var(--shadow); }
-      .projects__row-img { width: 100%; display: block; object-fit: cover; }
-
-      .projects__row-content {
-        padding: 2rem 0;
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        align-items: flex-start;
+      .projects__row-img-cont {
+        overflow: hidden;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        box-shadow: var(--shadow);
       }
-      @media only screen and (max-width: 56.25em) { .projects__row-content { align-items: center; } }
+
+      .projects__row-img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        transform: scale(1.02);
+      }
 
       .projects__row-content-title {
+        font-size: 2.6rem;
         font-weight: 900;
         color: #fff;
-        font-size: 2.8rem;
-        margin-bottom: 1.2rem;
+        margin-bottom: 0.8rem;
         text-shadow: var(--titleShadow);
       }
-      @media only screen and (max-width: 37.5em) { .projects__row-content-title { font-size: 2.4rem; } }
 
       .projects__row-content-desc {
-        font-size: 1.8rem;
+        font-size: 1.7rem;
         color: var(--textSoft);
-        max-width: 60rem;
         line-height: 1.7;
-        margin-bottom: 3rem;
-      }
-
-      .projects__meta { font-size: 1.7rem; font-weight: 800; color: var(--textSub); margin: 0 0 1rem 0; }
-
-      .main-footer { background: transparent; padding: 0 0 6rem 0; }
-      .main-footer__upper { display: flex; justify-content: space-between; gap: 4rem; padding: 0; flex-wrap: wrap; }
-      .main-footer__row-1, .main-footer__row-2 { flex: 1; min-width: 28rem; }
-
-      .main-footer__short-desc { margin-top: 2rem; color: #eee; font-size: 1.5rem; line-height: 1.7; }
-      .main-footer__social-cont { margin-top: 2rem; display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
-
-      .footer-emails {
-        color: var(--textOnGlass);
-        font-size: 1.3rem;
-        line-height: 1.8;
-        margin-top: 1.2rem;
-      }
-      .footer-emails a { text-decoration: underline; text-underline-offset: 3px; }
-
-      .main-footer__lower {
-        margin-top: 4rem;
-        padding: 3.2rem 0 0 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.16);
-        color: #eee;
-        font-size: 1.2rem;
-        text-align: center;
-      }
-      .main-footer__lower a { text-decoration: underline; font-weight: 900; margin-left: 2px; }
-
-      .mouse {
-        width: 25px;
-        height: 40px;
-        border: 2px solid #eee;
-        border-radius: 60px;
-        position: relative;
-        overflow: hidden;
-      }
-      .mouse::before {
-        content: "";
-        width: 5px;
-        height: 5px;
-        position: absolute;
-        top: 7px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #eee;
-        border-radius: 50%;
-        opacity: 1;
-        animation: wheel 1.5s infinite;
-      }
-      @keyframes wheel { to { opacity: 0; top: 27px; } }
-
-      @media (prefers-reduced-motion: reduce) {
-        html { scroll-behavior: auto; }
-        .btn, .nav-icon span { transition: none; }
-        .mouse::before { animation: none; }
-      }
-      .github-strip {
-      padding: 6rem 0 2rem 0;
-      }
-
-      .github-strip__panel {
-        max-width: 116rem;
-        margin: 0 auto;
-        padding: clamp(2.0rem, 2.6vw, 3.4rem);
-      }
-
-      .github-strip__heading {
         margin-bottom: 2.2rem;
       }
 
-      .github-strip__controls {
+      .projects__meta {
+        font-size: 1.4rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--textSub);
+        font-weight: 900;
+        margin-bottom: 1.2rem;
+      }
+
+      .main-footer {
+        padding: 0 0 6rem 0;
+      }
+
+      .main-footer__upper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        margin-bottom: 2.2rem;
+      }
+
+      @media (max-width: 56.25em) {
+        .main-footer__upper {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .main-footer__social-cont {
         display: flex;
-        align-items: stretch;
         gap: 1.2rem;
+        margin-top: 1.4rem;
+        flex-wrap: wrap;
+      }
+
+      .footer-emails {
+        margin-top: 1.8rem;
+        font-size: 1.6rem;
+        color: var(--textSoft);
+        line-height: 1.6;
+      }
+      .footer-emails a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+
+      .main-footer__short-desc {
+        margin-top: 1.4rem;
+        font-size: 1.8rem;
+        color: var(--textSoft);
+        line-height: 1.7;
+      }
+
+      .main-footer__lower {
+        padding-top: 2.2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        font-size: 1.5rem;
+        color: var(--textSub);
+        text-align: center;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .main-footer__lower a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+      .github-strip {
+        padding: 9rem 0 3rem 0;
+      }
+
+      .github-strip__panel {
+        max-width: 118rem;
+        margin: 0 auto;
+        padding: clamp(2.4rem, 3vw, 4.4rem);
+      }
+
+      .github-strip__heading {
+        margin-bottom: 3rem;
+      }
+
+      .github-strip__controls {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1.2rem;
+        align-items: center;
       }
 
       .github-strip__btn {
-        min-width: 4.4rem;
+        width: 4.4rem;
+        height: 4.4rem;
+        border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.14);
         background: rgba(255, 255, 255, 0.06);
         color: var(--accent);
-        border-radius: 12px;
-        font-size: 2.8rem;
+        font-size: 2.6rem;
         font-weight: 900;
         cursor: pointer;
+        transition: filter 0.2s ease, transform 0.2s ease;
         box-shadow: var(--shadow);
-        transition: transform 0.2s ease, filter 0.2s ease;
       }
-
-      .github-strip__btn:hover {
-        transform: translateY(-2px);
-        filter: brightness(1.08);
-      }
+      .github-strip__btn:hover { filter: brightness(1.10); transform: translateY(-1px); }
 
       .github-strip__scroller {
-        flex: 1;
         overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
         scroll-snap-type: x mandatory;
-        border-radius: 14px;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 16px;
         border: 1px solid rgba(255, 255, 255, 0.10);
-        background: rgba(0, 0, 0, 0.16);
-      }
-
-      .github-strip__scroller:focus-visible {
-        outline: 3px solid var(--accent);
-        outline-offset: 3px;
+        background: rgba(255, 255, 255, 0.03);
       }
 
       .github-strip__list {
-        display: flex;
-        gap: 1.6rem;
-        padding: 1.2rem;
-        min-height: 16.5rem;
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(240px, 320px);
+        gap: 1.2rem;
+        padding: 1.4rem;
       }
 
       .github-card {
         scroll-snap-align: start;
-        min-width: clamp(24rem, 34vw, 32rem);
-        max-width: 34rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        gap: 1.2rem;
-        padding: 1.6rem;
         border-radius: 16px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(12, 14, 16, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.10);
         box-shadow: var(--shadow);
+        padding: 1.6rem;
+        display: grid;
+        gap: 1.2rem;
+        min-height: 16.5rem;
         transition: transform 0.2s ease, filter 0.2s ease;
       }
-
-      .github-card:hover {
-        transform: translateY(-2px);
-        filter: brightness(1.06);
-      }
+      .github-card:hover { transform: translateY(-3px); filter: brightness(1.06); }
 
       .github-card__top {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
         gap: 1.2rem;
       }
 
       .github-card__name {
-        font-size: 1.7rem;
+        font-size: 1.8rem;
         font-weight: 900;
         color: #fff;
-        letter-spacing: 0.3px;
-        text-shadow: var(--titleShadow);
-        word-break: break-word;
+        letter-spacing: 1px;
       }
 
       .github-card__desc {
-        font-size: 1.45rem;
+        font-size: 1.5rem;
         color: var(--textSoft);
         line-height: 1.6;
+        min-height: 5.2rem;
       }
 
       .github-card__meta {
         display: flex;
-        align-items: center;
         justify-content: space-between;
+        align-items: center;
         gap: 1.2rem;
-        margin-top: 0.2rem;
+        margin-top: 0.4rem;
+        flex-wrap: wrap;
       }
 
       .github-card__meta-left {
         display: flex;
-        align-items: center;
         gap: 0.8rem;
         flex-wrap: wrap;
-      }
-
-      .github-card__meta-right {
-        font-size: 1.2rem;
-        font-weight: 800;
-        color: var(--textSub);
-        white-space: nowrap;
+        align-items: center;
       }
 
       .github-pill {
@@ -1417,19 +1369,25 @@
         color: #000;
         background: var(--accent);
         border-radius: 999px;
-        padding: 0.5rem 0.9rem;
+        padding: 0.6rem 1.0rem;
+        letter-spacing: 1px;
+      }
+
+      .github-card__meta-right {
+        font-size: 1.2rem;
+        color: var(--textSub);
+        font-weight: 800;
+        letter-spacing: 1px;
       }
 
       .github-strip__footer {
-        margin-top: 1.6rem;
-        display: flex;
-        justify-content: center;
+        margin-top: 2.2rem;
+        text-align: center;
       }
 
       .github-strip__empty {
-        color: var(--textSub);
         font-size: 1.6rem;
-        font-weight: 800;
+        color: var(--textSoft);
         padding: 1.2rem;
       }
 
